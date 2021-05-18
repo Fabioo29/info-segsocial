@@ -23,7 +23,7 @@ class SSD:
         self.password = password
         self.ano_min = ano_min
         self.ano_max = ano_max
-        self.pdData = pd.DataFrame({'Data': [], 'Dias': [], 'Origem': []})
+        self.pdData = pd.DataFrame({'Data': [], 'Dias': [], 'Valor': [], 'Origem': []})
 
         self.get_page()
         
@@ -93,8 +93,8 @@ class SSD:
         #    file.write(str(soup))
 
     def save_data(self, valor):
-        if valor:
-            self.pdData.drop(['Valor'], axis=1)  # remove 'Valor' collumn according to user option
+        if not valor:
+            self.pdData = self.pdData.drop(['Valor'], axis=1)  # remove 'Valor' collumn according to user option
         self.pdData.to_csv("output.csv", index=False)  # save data to .csv format (excel)
         pass
 
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     parser.add_argument('-u','--user', help='Account ID', required=True)
     parser.add_argument('-p','--pw', help='Account password', required=True)
     parser.add_argument('-d','--data', default="2000/2021", help='AnoInicio/AnoFim do extrato ex:1989/2021')
-    parser.add_argument('--valor', default=True, help='Eliminar coluna valor? (True/False)')
+    parser.add_argument('-v', '--valor', action="store_true", help='Adicionar coluna "Valor"')
 
     args = parser.parse_args()
 

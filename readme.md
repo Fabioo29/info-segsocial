@@ -6,7 +6,7 @@
         $ pip install -r requirements.txt
 
 ### Utilização
-    usage: main.py [-h] -u USER -p PW [-d DATA] [--valor VALOR]
+    usage: main.py [-h] -u USER -p PW [-d DATA] [-v]
 
     Seg-social direta extrato renumerações
 
@@ -15,4 +15,4 @@
     -u USER, --user USER  Account ID
     -p PW, --pw PW        Account password
     -d DATA, --data DATA  AnoInicio/AnoFim do extrato ex:1989/2021
-    --valor VALOR         Eliminar coluna valor? (True/False)
+    -v, --valor           Adicionar coluna "Valor"
