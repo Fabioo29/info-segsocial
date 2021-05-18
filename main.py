@@ -14,6 +14,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 
+
 class SSD: 
     def __init__(self, name, password, ano_min, ano_max):
         self.headers = {}
@@ -28,9 +29,11 @@ class SSD:
         
     def get_page(self):
         
+        # Start WebDriver
         driver = webdriver.Chrome(ChromeDriverManager().install())
         driver.maximize_window()
-
+        
+        # Go to info page
         driver.get('https://app.seg-social.pt/sso/login')
         driver.find_element_by_id('username').send_keys(str(self.name))
         driver.find_element_by_id('password').send_keys(str(self.password))
@@ -38,13 +41,15 @@ class SSD:
 
         driver.get('https://app.seg-social.pt/ptss/cci/carreiraContributiva/consultar')
         
+        # Wait for necessary element to load 
         Driver_wait = WebDriverWait(driver, 10).until(ec.visibility_of_element_located((By.CLASS_NAME, "ui-commandlink.ui-widget")))
         ActionChains(driver).move_to_element(Driver_wait).perform()
-
+        
         driver.find_elements_by_class_name("ui-commandlink.ui-widget")[0].click()
 
         for ano in tqdm(range(int(self.ano_min), int(self.ano_max)+1)):
             
+            # Select current year from dropdown menu
             Driver_wait = WebDriverWait(driver, 10).until(ec.visibility_of_element_located((By.ID, "mainForm:ano_label")))
             ActionChains(driver).move_to_element(Driver_wait).perform()
 
@@ -62,7 +67,8 @@ class SSD:
             driver.find_elements_by_class_name("ui-commandlink.ui-widget")[0].click()
 
             for mes in range(0,12):
-
+                
+                # Select current month from dropdown menu
                 Driver_wait = WebDriverWait(driver, 10).until(ec.visibility_of_element_located((By.XPATH, '//*[@id="mainForm:mes"]')))
                 ActionChains(driver).move_to_element(Driver_wait).perform()
 
@@ -74,10 +80,13 @@ class SSD:
                     Driver_wait = WebDriverWait(driver, 10).until(ec.visibility_of_element_located((By.CLASS_NAME, 'ui-datatable-tablewrapper')))
                     ActionChains(driver).move_to_element(Driver_wait).perform()
                     
-                    tempData = pd.read_html(driver.page_source)[0].drop(['Unnamed: 2'], axis=1)
-                    tempData['Data'] = "{:02d}/{:4d}".format(mes+1, ano)
-                    self.pdData = self.pdData.append(tempData)
+                    # Get table data using pandas 
+                    tempData = pd.read_html(driver.page_source)[0].drop(['Unnamed: 2'], axis=1)  # remove 'Unnamed: 2' collumn
+                    tempData['Data'] = "{:02d}/{:4d}".format(mes+1, ano)  # add 'Data' collumn with month/year
+                    
+                    self.pdData = self.pdData.append(tempData) # append current page data to main dataframe 
                 except:
+                    # If current month doesn't exist ==> for = break
                     break
 
         #with open("index.html", "w") as file:
@@ -85,13 +94,11 @@ class SSD:
 
     def save_data(self, valor):
         if valor:
-            self.pdData.drop(['Valor'], axis=1)
-        self.pdData.to_csv("output.csv", index=False)
+            self.pdData.drop(['Valor'], axis=1)  # remove 'Valor' collumn according to user option
+        self.pdData.to_csv("output.csv", index=False)  # save data to .csv format (excel)
         pass
 
-
-
-
+    
 if __name__ == "__main__":
     
     parser = ArgumentParser(description='Seg-social direta extrato renumerações')
